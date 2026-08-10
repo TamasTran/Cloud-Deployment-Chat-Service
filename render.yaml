@@ -8,6 +8,7 @@ services:
     name: day12-chat
     runtime: docker
     dockerfilePath: ./Dockerfile
+    autoDeployTrigger: off
     plan: free
     healthCheckPath: /healthz
     envVars:

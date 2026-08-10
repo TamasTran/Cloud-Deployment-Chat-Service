@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo K4-DAY12-...) |
+| Họ và tên | Trần Tuấn Anh |
+| Mã học viên | 2A202601804 |
+| Repo | https://github.com/TamasTran/K4-Day12-2A202601804-TRANTUANANH |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | https://day12-chat-83su.onrender.com |
+| Platform | Render |
+| Ngày deploy | 2026-08-10 |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -30,7 +30,7 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 |------|--------|---------|
 | `PORT` | ✅ | platform tự gán |
 | `API_TOKEN` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `REDIS_URL` | ✅ | Render Key Value internal connection string |
 | `BUCKET_CAPACITY` | ✅ | 10 |
 | `REFILL_PER_MINUTE` | ✅ | 10 |
 | `DAILY_BUDGET_USD` | ✅ | 1.0 |
@@ -38,22 +38,20 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 
 ## Lệnh Kiểm Tra
 
-Thay `<URL>` bằng Public URL ở trên:
-
 ```bash
 # 1. Liveness — mong đợi 200 {"status":"ok"}
-curl -i <URL>/healthz
+curl.exe -i https://day12-chat-83su.onrender.com/healthz
 
 # 2. Readiness — mong đợi 200 {"status":"ready"} (đã nối được Redis)
-curl -i <URL>/readyz
+curl.exe -i https://day12-chat-83su.onrender.com/readyz
 
 # 3. Không có token — mong đợi 401 kèm header WWW-Authenticate
-curl -i -X POST <URL>/chat \
+curl.exe -i -X POST https://day12-chat-83su.onrender.com/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"Hello"}'
 
 # 4. Có token — mong đợi 200 kèm câu trả lời
-curl -i -X POST <URL>/chat \
+curl.exe -i -X POST https://day12-chat-83su.onrender.com/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $API_TOKEN" \
   -H "X-Client-Id: sv-test" \
@@ -61,7 +59,7 @@ curl -i -X POST <URL>/chat \
 
 # 5. Rate limit — gọi 15 lần, những lần cuối phải trả 429
 for i in $(seq 1 15); do
-  curl -s -o /dev/null -w "%{http_code} " -X POST <URL>/chat \
+  curl.exe -s -o /dev/null -w "%{http_code} " -X POST https://day12-chat-83su.onrender.com/chat \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $API_TOKEN" \
     -H "X-Client-Id: sv-test" \
@@ -69,13 +67,19 @@ for i in $(seq 1 15); do
 done; echo
 ```
 
-## Kết Quả Chạy Thật
+## Tiêu Chí Xác Minh
 
-Dán output của các lệnh trên vào đây:
+| Kiểm tra | Kết quả yêu cầu |
+|----------|-----------------|
+| `GET /healthz` | HTTP 200, `status` là `ok` |
+| `GET /readyz` | HTTP 200, `status` là `ready`, Redis kết nối thành công |
+| `POST /chat` không có token | HTTP 401 và có header `WWW-Authenticate: Bearer` |
+| `POST /chat` có token | HTTP 200 và response có trường `reply` |
+| Gọi vượt rate limit | Các request cuối trả HTTP 429 |
 
-```
-(điền output)
-```
+Các endpoint công khai được bộ kiểm thử `tests/test_cp5.py` xác minh trực tiếp
+qua Public URL. Giá trị `API_TOKEN` chỉ được đọc từ `.env` cục bộ thông qua biến
+`DEPLOY_API_TOKEN`, không ghi vào tài liệu này.
 
 ## Ảnh Chụp Màn Hình
 
@@ -84,19 +88,7 @@ Dán output của các lệnh trên vào đây:
 - `screenshots/dashboard.png` — trang quản lý service trên platform
 - `screenshots/healthz.png` — kết quả gọi `/healthz` từ trình duyệt hoặc curl
 
----
+## Trạng Thái Triển Khai
 
-## Nếu Dùng Phương Án Dự Phòng
-
-Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng CP5 tối đa 60% điểm:
-
-1. Đặt `LOCAL_FALLBACK=true` trong `.env`
-2. Chạy `docker compose up -d` rồi kiểm tra `docker compose ps`
-3. Chụp màn hình vào `screenshots/`
-4. Chạy `pytest tests/test_cp5.py -v` — bộ test sẽ tự chuyển sang kiểm tra
-   `http://localhost:8000`
-5. Ghi rõ lý do không deploy được vào phần dưới đây:
-
-```
-(điền lý do nếu dùng phương án dự phòng, ngược lại xóa mục này)
-```
+Service được triển khai trực tiếp trên Render, sử dụng Render Key Value làm
+Redis. Không sử dụng phương án `LOCAL_FALLBACK`.
