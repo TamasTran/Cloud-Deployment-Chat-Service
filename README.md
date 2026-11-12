@@ -1,4 +1,4 @@
-# K4 — Ngày 12: Hạ Tầng Cloud & Deployment (14h00–18h00)
+# Cloud-Deployment-Chat-Service-Lab
 
 [![CI/CD](https://github.com/TamasTran/K4-Day12-2A202601804-TRANTUANANH/actions/workflows/ci.yml/badge.svg)](https://github.com/TamasTran/K4-Day12-2A202601804-TRANTUANANH/actions/workflows/ci.yml)
 
